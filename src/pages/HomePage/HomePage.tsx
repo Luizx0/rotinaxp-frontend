@@ -1,3 +1,4 @@
+import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import { Link } from "react-router-dom";
 import { appPaths } from "../../routes/paths";
 
@@ -9,7 +10,9 @@ function HomePage() {
 
         <header className="home-page__topbar">
           <div className="home-page__brand">
-            <span className="home-page__logo">RX</span>
+            <span className="home-page__logo" aria-hidden="true">
+              <ScienceOutlinedIcon fontSize="small" />
+            </span>
             <strong>RotinaXP</strong>
           </div>
 
