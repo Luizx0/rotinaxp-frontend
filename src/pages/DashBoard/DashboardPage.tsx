@@ -2,6 +2,7 @@ import { useState } from "react";
 import CompletionChart from "../../components/charts/CompletionChart";
 import PointsAreaChart from "../../components/charts/PointsAreaChart";
 import AlertBanner from "../../components/common/AlertBanner";
+import OnboardingGuide from "../../components/common/OnboardingGuide";
 import PageTabs from "../../components/common/PageTabs";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
@@ -9,7 +10,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 function DashboardPage() {
   const { session } = useAuth();
-  const { tasks, rewards, progress, isLoading, error } = useAppData();
+  const { tasks, rewards, progress, isLoading, error, isOnboardingVisible, dismissOnboarding } = useAppData();
   const [activeTab, setActiveTab] = useState("overview");
 
   const completedTasks = tasks.filter((task) => task.completed).length;
@@ -53,6 +54,7 @@ function DashboardPage() {
 
       {isLoading ? <p className="form-hint">Atualizando indicadores...</p> : null}
       {error ? <AlertBanner message={error} /> : null}
+      {isOnboardingVisible ? <OnboardingGuide onDismiss={dismissOnboarding} /> : null}
 
       {activeTab === "overview" ? (
         <div className="dashboard-grid">
@@ -67,6 +69,12 @@ function DashboardPage() {
               </div>
             </div>
             <div className="stack-list">
+              {topTasks.length === 0 ? (
+                <div className="mini-card">
+                  <strong>Nenhuma tarefa criada</strong>
+                  <p>Use a tela de tarefas para começar a montar sua rotina.</p>
+                </div>
+              ) : null}
               {topTasks.map((task) => (
                 <div key={task.id} className="mini-card">
                   <strong>{task.title}</strong>
@@ -151,7 +159,7 @@ function DashboardPage() {
             <div className="stack-list">
               <div className="mini-card">
                 <strong>{progress.at(-1)?.points ?? 0} XP hoje</strong>
-                <p>Seu ritmo mais recente ficou acima do inicio da semana.</p>
+                <p>{completedTasks === 0 ? "Seu progresso vai aparecer quando concluir a primeira tarefa." : "Seu ritmo mais recente ficou acima do inicio da semana."}</p>
               </div>
               <div className="mini-card">
                 <strong>{availableRewards} recompensas abertas</strong>

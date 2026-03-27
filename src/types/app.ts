@@ -1,5 +1,6 @@
 export type TaskCategory = "Saude" | "Estudos" | "Trabalho" | "Pessoal";
 export type TaskPriority = "baixa" | "media" | "alta";
+export type RewardAccent = "sunrise" | "ocean" | "forest" | "ember";
 
 export interface UserProfile {
   id: string;
@@ -63,7 +64,14 @@ export interface Reward {
   description: string;
   cost: number;
   claimed: boolean;
-  accent: string;
+  accent: RewardAccent;
+}
+
+export interface RewardDraft {
+  title: string;
+  description: string;
+  cost: number;
+  accent: RewardAccent;
 }
 
 export interface ProgressPoint {

@@ -1,24 +1,76 @@
 import { initialRewards } from "../data/mockData";
-import { Reward } from "../types/app";
-import { readStorage, storageKeys, writeStorage } from "./storage";
+import { Reward, RewardDraft } from "../types/app";
+import { getStoredSessionUserId, readStorage, storageKeys, writeStorage } from "./storage";
 
-function seedRewards() {
-  const storedRewards = readStorage<Reward[]>(storageKeys.rewards, []);
+type RewardsByUser = Record<string, Reward[]>;
 
-  if (storedRewards.length > 0) {
+function getCurrentUserId() {
+  const userId = getStoredSessionUserId();
+
+  if (!userId) {
+    throw new Error("Sessao de usuario nao encontrada.");
+  }
+
+  return userId;
+}
+
+function getRewardsStore() {
+  return readStorage<RewardsByUser>(storageKeys.rewardsByUser, {});
+}
+
+function seedRewards(userId: string) {
+  const rewardsStore = getRewardsStore();
+  const storedRewards = rewardsStore[userId];
+
+  if (Array.isArray(storedRewards)) {
     return storedRewards;
   }
 
-  writeStorage(storageKeys.rewards, initialRewards);
-  return initialRewards;
+  const seededRewards = userId === "user-demo" ? initialRewards : [];
+  rewardsStore[userId] = seededRewards;
+  writeStorage(storageKeys.rewardsByUser, rewardsStore);
+  return seededRewards;
+}
+
+function persistRewards(userId: string, rewards: Reward[]) {
+  const rewardsStore = getRewardsStore();
+  rewardsStore[userId] = rewards;
+  writeStorage(storageKeys.rewardsByUser, rewardsStore);
 }
 
 export async function getRewards(): Promise<Reward[]> {
-  return seedRewards();
+  return seedRewards(getCurrentUserId());
+}
+
+export function createEmptyRewardDraft(): RewardDraft {
+  return {
+    title: "",
+    description: "",
+    cost: 60,
+    accent: "sunrise",
+  };
+}
+
+export async function createReward(draft: RewardDraft): Promise<Reward> {
+  const userId = getCurrentUserId();
+  const rewards = seedRewards(userId);
+
+  const newReward: Reward = {
+    id: `reward-${Date.now()}`,
+    title: draft.title.trim(),
+    description: draft.description.trim(),
+    cost: Math.max(10, draft.cost),
+    claimed: false,
+    accent: draft.accent,
+  };
+
+  persistRewards(userId, [newReward, ...rewards]);
+  return newReward;
 }
 
 export async function redeemReward(rewardId: string): Promise<Reward> {
-  const rewards = seedRewards();
+  const userId = getCurrentUserId();
+  const rewards = seedRewards(userId);
   const reward = rewards.find((item) => item.id === rewardId);
 
   if (!reward) {
@@ -31,6 +83,6 @@ export async function redeemReward(rewardId: string): Promise<Reward> {
   };
 
   const nextRewards = rewards.map((item) => (item.id === rewardId ? updatedReward : item));
-  writeStorage(storageKeys.rewards, nextRewards);
+  persistRewards(userId, nextRewards);
   return updatedReward;
 }

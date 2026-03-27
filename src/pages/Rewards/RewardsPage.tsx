@@ -1,13 +1,15 @@
 import { useState } from "react";
 import AlertBanner from "../../components/common/AlertBanner";
 import PageTabs from "../../components/common/PageTabs";
+import RewardComposer from "../../components/rewards/RewardComposer";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
 import { useAuth } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../services/errorService";
+import { RewardDraft } from "../../types/app";
 
 function RewardsPage() {
-  const { rewards, redeemReward, isLoading, error, clearError } = useAppData();
+  const { rewards, redeemReward, addReward, isLoading, error, clearError } = useAppData();
   const { session } = useAuth();
   const [activeTab, setActiveTab] = useState("available");
   const [localError, setLocalError] = useState<string | null>(null);
@@ -28,6 +30,18 @@ function RewardsPage() {
       await redeemReward(rewardId);
     } catch (currentError) {
       setLocalError(getErrorMessage(currentError, "Nao foi possivel resgatar a recompensa."));
+    }
+  }
+
+  async function handleCreateReward(draft: RewardDraft) {
+    setLocalError(null);
+    clearError();
+
+    try {
+      await addReward(draft);
+      setActiveTab("available");
+    } catch (currentError) {
+      setLocalError(getErrorMessage(currentError, "Nao foi possivel criar a recompensa."));
     }
   }
 
@@ -64,7 +78,15 @@ function RewardsPage() {
         <StatCard label="Ja resgatadas" value={`${rewards.filter((reward) => reward.claimed).length}`} helper="historico de premios" tone="success" />
       </div>
 
+      <RewardComposer onSubmit={handleCreateReward} />
+
       <div className="reward-grid">
+        {visibleRewards.length === 0 ? (
+          <article className="empty-card">
+            <h3>Nenhuma recompensa cadastrada</h3>
+            <p>Use o formulario acima para criar sua primeira recompensa da loja.</p>
+          </article>
+        ) : null}
         {visibleRewards.map((reward) => {
           const canRedeem = !reward.claimed && reward.cost <= (session?.user.points ?? 0);
 

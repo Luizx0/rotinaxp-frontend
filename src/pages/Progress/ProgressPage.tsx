@@ -55,6 +55,13 @@ function ProgressPage() {
             </div>
           </div>
           <div className="timeline-list">
+            {completedTasks.length === 0 ? (
+              <div className="timeline-item">
+                <strong>Sem eventos ainda</strong>
+                <p>Conclua tarefas para construir seu histórico de progresso.</p>
+                <span>0 XP</span>
+              </div>
+            ) : null}
             {completedTasks.map((task) => (
               <div key={task.id} className="timeline-item">
                 <strong>{task.title}</strong>

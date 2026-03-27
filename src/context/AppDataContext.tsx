@@ -1,16 +1,16 @@
 import { createContext, PropsWithChildren, useCallback, useEffect, useState } from "react";
-import { initialProgress } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
 import { getLevelFromPoints } from "../services/authService";
 import { getErrorMessage } from "../services/errorService";
-import { redeemReward as redeemRewardService, getRewards } from "../services/rewardService";
+import { createReward, getRewards, redeemReward as redeemRewardService } from "../services/rewardService";
+import { readStorage, storageKeys, writeStorage } from "../services/storage";
 import {
   alternarConclusao,
   atualizarTarefa,
   criarTarefa,
   getTarefas,
 } from "../services/tarefaService";
-import { ProgressPoint, Reward, Task, TaskDraft } from "../types/app";
+import { ProgressPoint, Reward, RewardDraft, Task, TaskDraft } from "../types/app";
 
 interface AppDataContextValue {
   tasks: Task[];
@@ -18,12 +18,15 @@ interface AppDataContextValue {
   progress: ProgressPoint[];
   isLoading: boolean;
   error: string | null;
+  isOnboardingVisible: boolean;
   clearError: () => void;
+  dismissOnboarding: () => void;
   refreshAll: () => Promise<void>;
   addTask: (draft: TaskDraft) => Promise<void>;
   updateTask: (taskId: string, draft: TaskDraft) => Promise<void>;
   toggleTask: (taskId: string) => Promise<void>;
   redeemReward: (rewardId: string) => Promise<void>;
+  addReward: (draft: RewardDraft) => Promise<void>;
 }
 
 export const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -58,13 +61,18 @@ function buildProgress(tasks: Task[]): ProgressPoint[] {
     bucket.tasks += 1;
   });
 
-  const hasData = buckets.some((item) => item.points > 0 || item.tasks > 0);
-
-  if (!hasData) {
-    return initialProgress;
-  }
-
   return buckets.map(({ dayKey: _dayKey, ...item }) => item);
+}
+
+function readOnboardingState(userId: string) {
+  const onboardingByUser = readStorage<Record<string, boolean>>(storageKeys.onboardingByUser, {});
+  return onboardingByUser[userId] ?? false;
+}
+
+function writeOnboardingState(userId: string, isDismissed: boolean) {
+  const onboardingByUser = readStorage<Record<string, boolean>>(storageKeys.onboardingByUser, {});
+  onboardingByUser[userId] = isDismissed;
+  writeStorage(storageKeys.onboardingByUser, onboardingByUser);
 }
 
 export function AppDataProvider({ children }: PropsWithChildren) {
@@ -73,6 +81,7 @@ export function AppDataProvider({ children }: PropsWithChildren) {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnboardingDismissed, setIsOnboardingDismissed] = useState(false);
 
   const refreshAll = useCallback(async () => {
     setError(null);
@@ -101,6 +110,15 @@ export function AppDataProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     void refreshAll().catch(() => undefined);
   }, [refreshAll, session?.user.id]);
+
+  useEffect(() => {
+    if (!session) {
+      setIsOnboardingDismissed(false);
+      return;
+    }
+
+    setIsOnboardingDismissed(readOnboardingState(session.user.id));
+  }, [session?.user.id]);
 
   async function addTask(draft: TaskDraft) {
     setError(null);
@@ -189,6 +207,27 @@ export function AppDataProvider({ children }: PropsWithChildren) {
     });
   }
 
+  async function addReward(draft: RewardDraft) {
+    setError(null);
+
+    try {
+      const createdReward = await createReward(draft);
+      setRewards((currentRewards) => [createdReward, ...currentRewards]);
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel criar a recompensa."));
+      throw currentError;
+    }
+  }
+
+  function dismissOnboarding() {
+    if (!session) {
+      return;
+    }
+
+    writeOnboardingState(session.user.id, true);
+    setIsOnboardingDismissed(true);
+  }
+
   function clearError() {
     setError(null);
   }
@@ -201,12 +240,15 @@ export function AppDataProvider({ children }: PropsWithChildren) {
         progress: buildProgress(tasks),
         isLoading,
         error,
+        isOnboardingVisible: !isOnboardingDismissed && tasks.length === 0,
         clearError,
+        dismissOnboarding,
         refreshAll,
         addTask,
         updateTask,
         toggleTask,
         redeemReward,
+        addReward,
       }}
     >
       {children}

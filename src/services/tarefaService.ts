@@ -1,21 +1,42 @@
 import { initialTasks } from "../data/mockData";
 import { Task, TaskDraft } from "../types/app";
 import api from "./api";
-import { readStorage, storageKeys, writeStorage } from "./storage";
+import { getStoredSessionUserId, readStorage, storageKeys, writeStorage } from "./storage";
 
-function seedTasks() {
-  const storedTasks = readStorage<Task[]>(storageKeys.tasks, []);
+type TasksByUser = Record<string, Task[]>;
 
-  if (storedTasks.length > 0) {
+function getCurrentUserId() {
+  const userId = getStoredSessionUserId();
+
+  if (!userId) {
+    throw new Error("Sessao de usuario nao encontrada.");
+  }
+
+  return userId;
+}
+
+function getTasksStore() {
+  return readStorage<TasksByUser>(storageKeys.tasksByUser, {});
+}
+
+function seedTasks(userId: string) {
+  const tasksStore = getTasksStore();
+  const storedTasks = tasksStore[userId];
+
+  if (Array.isArray(storedTasks)) {
     return storedTasks;
   }
 
-  writeStorage(storageKeys.tasks, initialTasks);
-  return initialTasks;
+  const seededTasks = userId === "user-demo" ? initialTasks : [];
+  tasksStore[userId] = seededTasks;
+  writeStorage(storageKeys.tasksByUser, tasksStore);
+  return seededTasks;
 }
 
-function persistTasks(tasks: Task[]) {
-  writeStorage(storageKeys.tasks, tasks);
+function persistTasks(userId: string, tasks: Task[]) {
+  const tasksStore = getTasksStore();
+  tasksStore[userId] = tasks;
+  writeStorage(storageKeys.tasksByUser, tasksStore);
   return tasks;
 }
 
@@ -48,22 +69,26 @@ export function createEmptyTaskDraft(): TaskDraft {
 }
 
 export async function getTarefas(): Promise<Task[]> {
+  const userId = getCurrentUserId();
+
   try {
     const response = await api.get("/tarefas");
 
     if (Array.isArray(response.data)) {
       const mappedTasks = response.data.map((item) => mapApiTask(item as Record<string, unknown>));
-      persistTasks(mappedTasks);
+      persistTasks(userId, mappedTasks);
       return mappedTasks;
     }
   } catch {
-    return seedTasks();
+    return seedTasks(userId);
   }
 
-  return seedTasks();
+  return seedTasks(userId);
 }
 
 export async function criarTarefa(draft: TaskDraft): Promise<Task> {
+  const userId = getCurrentUserId();
+
   const fallbackTask: Task = {
     id: `task-${Date.now()}`,
     title: draft.title,
@@ -88,18 +113,19 @@ export async function criarTarefa(draft: TaskDraft): Promise<Task> {
     });
 
     const createdTask = mapApiTask(response.data as Record<string, unknown>, fallbackTask);
-    const nextTasks = [createdTask, ...seedTasks()];
-    persistTasks(nextTasks);
+    const nextTasks = [createdTask, ...seedTasks(userId)];
+    persistTasks(userId, nextTasks);
     return createdTask;
   } catch {
-    const nextTasks = [fallbackTask, ...seedTasks()];
-    persistTasks(nextTasks);
+    const nextTasks = [fallbackTask, ...seedTasks(userId)];
+    persistTasks(userId, nextTasks);
     return fallbackTask;
   }
 }
 
 export async function atualizarTarefa(taskId: string, draft: TaskDraft): Promise<Task> {
-  const tasks = seedTasks();
+  const userId = getCurrentUserId();
+  const tasks = seedTasks(userId);
   const currentTask = tasks.find((item) => item.id === taskId);
 
   if (!currentTask) {
@@ -124,17 +150,18 @@ export async function atualizarTarefa(taskId: string, draft: TaskDraft): Promise
 
     const updatedTask = mapApiTask(response.data as Record<string, unknown>, fallbackTask);
     const nextTasks = tasks.map((item) => (item.id === taskId ? updatedTask : item));
-    persistTasks(nextTasks);
+    persistTasks(userId, nextTasks);
     return updatedTask;
   } catch {
     const nextTasks = tasks.map((item) => (item.id === taskId ? fallbackTask : item));
-    persistTasks(nextTasks);
+    persistTasks(userId, nextTasks);
     return fallbackTask;
   }
 }
 
 export async function alternarConclusao(taskId: string): Promise<Task> {
-  const tasks = seedTasks();
+  const userId = getCurrentUserId();
+  const tasks = seedTasks(userId);
   const currentTask = tasks.find((item) => item.id === taskId);
 
   if (!currentTask) {
@@ -153,11 +180,11 @@ export async function alternarConclusao(taskId: string): Promise<Task> {
 
     const updatedTask = mapApiTask(response.data as Record<string, unknown>, fallbackTask);
     const nextTasks = tasks.map((item) => (item.id === taskId ? updatedTask : item));
-    persistTasks(nextTasks);
+    persistTasks(userId, nextTasks);
     return updatedTask;
   } catch {
     const nextTasks = tasks.map((item) => (item.id === taskId ? fallbackTask : item));
-    persistTasks(nextTasks);
+    persistTasks(userId, nextTasks);
     return fallbackTask;
   }
 }

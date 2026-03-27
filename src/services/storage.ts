@@ -1,8 +1,10 @@
 export const storageKeys = {
   authSession: "rotinaxp.auth.session",
   accounts: "rotinaxp.auth.accounts",
-  tasks: "rotinaxp.tasks",
-  rewards: "rotinaxp.rewards",
+  tasksByUser: "rotinaxp.tasks.byUser",
+  rewardsByUser: "rotinaxp.rewards.byUser",
+  onboardingByUser: "rotinaxp.onboarding.byUser",
+  themeMode: "rotinaxp.theme.mode",
 };
 
 export function readStorage<T>(key: string, fallback: T): T {
@@ -29,4 +31,9 @@ export function writeStorage<T>(key: string, value: T) {
   }
 
   window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function getStoredSessionUserId() {
+  const session = readStorage<{ user?: { id?: string } } | null>(storageKeys.authSession, null);
+  return session?.user?.id ?? null;
 }

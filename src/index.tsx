@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AppDataProvider } from "./context/AppDataContext";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./styles/global.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -11,11 +12,13 @@ const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <AppDataProvider>
-          <App />
-        </AppDataProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppDataProvider>
+            <App />
+          </AppDataProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

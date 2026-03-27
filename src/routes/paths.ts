@@ -20,9 +20,9 @@ export const topBarTitleMap: Record<string, string> = {
 };
 
 export const sidebarMenuItems = [
-  { label: "Dashboard", to: appPaths.dashboard, code: "DB" },
-  { label: "Tarefas", to: appPaths.tasks, code: "TK" },
-  { label: "Recompensas", to: appPaths.rewards, code: "RW" },
-  { label: "Progresso", to: appPaths.progress, code: "PG" },
-  { label: "Perfil", to: appPaths.profile, code: "PF" },
+  { label: "Dashboard", to: appPaths.dashboard, icon: "dashboard" },
+  { label: "Tarefas", to: appPaths.tasks, icon: "tasks" },
+  { label: "Recompensas", to: appPaths.rewards, icon: "rewards" },
+  { label: "Progresso", to: appPaths.progress, icon: "progress" },
+  { label: "Perfil", to: appPaths.profile, icon: "profile" },
 ];
