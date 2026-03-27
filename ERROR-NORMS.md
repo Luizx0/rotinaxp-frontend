@@ -3,6 +3,7 @@
 ## Ambiente
 - Nao usar `!` no caminho do projeto.
 - Preferir caminho local sem caracteres especiais.
+- Para dev local neste frontend, usar `npm start` (nao existe `npm run dev`).
 
 ## Toolchain
 - Em projeto com `react-scripts@5`, manter `typescript@4.9.5`.
@@ -23,11 +24,13 @@
 - Paths e metadados de navegacao centralizados em `src/routes/paths.ts`.
 
 ## Checklist de falhas comuns
-1. Rodar `npm run typecheck`.
-2. Rodar `npm run build`.
-3. Se houver erro de webpack com caminho, remover `!` da rota da pasta.
-4. Conferir imports quebrados por renomeacao de arquivo/pasta.
-5. Conferir versoes de `typescript`, `react-scripts` e `react-router-dom`.
+1. Rodar `npm install` se as dependencias nao estiverem instaladas.
+2. Rodar `npm start` para validar inicializacao local.
+3. Rodar `npm run typecheck`.
+4. Rodar `npm run build`.
+5. Se houver erro de webpack com caminho, remover `!` da rota da pasta.
+6. Conferir imports quebrados por renomeacao de arquivo/pasta.
+7. Conferir versoes de `typescript`, `react-scripts` e `react-router-dom`.
 
 ## Checklist de fechamento
 1. `npm run typecheck` sem erros.

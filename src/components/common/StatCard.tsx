@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+import { fadeInUp } from "./motion";
+
 interface StatCardProps {
   label: string;
   value: string;
@@ -7,11 +10,11 @@ interface StatCardProps {
 
 function StatCard({ label, value, helper, tone = "neutral" }: StatCardProps) {
   return (
-    <article className={`stat-card stat-card--${tone}`}>
+    <motion.article className={`stat-card stat-card--${tone}`} variants={fadeInUp}>
       <p className="stat-card__label">{label}</p>
       <strong className="stat-card__value">{value}</strong>
       <p className="stat-card__helper">{helper}</p>
-    </article>
+    </motion.article>
   );
 }
 

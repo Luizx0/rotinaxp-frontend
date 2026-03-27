@@ -1,5 +1,7 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import AlertBanner from "../../components/common/AlertBanner";
+import { fadeInUp, staggerContainer } from "../../components/common/motion";
 import PageTabs from "../../components/common/PageTabs";
 import RewardComposer from "../../components/rewards/RewardComposer";
 import StatCard from "../../components/common/StatCard";
@@ -47,7 +49,7 @@ function RewardsPage() {
 
   return (
     <section className="page-stack">
-      <div className="page-hero">
+      <motion.div className="page-hero" variants={fadeInUp} initial="hidden" animate="show">
         <div>
           <p className="section-eyebrow">Trocas</p>
           <h2>Recompensas</h2>
@@ -58,7 +60,7 @@ function RewardsPage() {
           <strong>{session?.user.points ?? 0} XP</strong>
           <p>Use os pontos ganhos nas tarefas para resgatar motivadores.</p>
         </div>
-      </div>
+      </motion.div>
 
       {isLoading ? <p className="form-hint">Carregando recompensas...</p> : null}
       {error ? <AlertBanner message={error} /> : null}
@@ -73,14 +75,16 @@ function RewardsPage() {
         onChange={setActiveTab}
       />
 
-      <div className="stats-grid stats-grid--compact">
+      <motion.div className="stats-grid stats-grid--compact" variants={staggerContainer} initial="hidden" animate="show">
         <StatCard label="Recompensas abertas" value={`${rewards.filter((reward) => !reward.claimed).length}`} helper="itens prontos para trocar" tone="primary" />
         <StatCard label="Ja resgatadas" value={`${rewards.filter((reward) => reward.claimed).length}`} helper="historico de premios" tone="success" />
-      </div>
+      </motion.div>
 
-      <RewardComposer onSubmit={handleCreateReward} />
+      <motion.div className="tour-reward-composer" variants={fadeInUp} initial="hidden" animate="show">
+        <RewardComposer onSubmit={handleCreateReward} />
+      </motion.div>
 
-      <div className="reward-grid">
+      <motion.div className="reward-grid tour-reward-grid" variants={staggerContainer} initial="hidden" animate="show">
         {visibleRewards.length === 0 ? (
           <article className="empty-card">
             <h3>Nenhuma recompensa cadastrada</h3>
@@ -91,7 +95,7 @@ function RewardsPage() {
           const canRedeem = !reward.claimed && reward.cost <= (session?.user.points ?? 0);
 
           return (
-            <article key={reward.id} className={`reward-card reward-card--${reward.accent}`}>
+            <motion.article key={reward.id} className={`reward-card reward-card--${reward.accent}`} variants={fadeInUp}>
               <div className="reward-card__top">
                 <span className="pill">{reward.claimed ? "Resgatada" : "Disponivel"}</span>
                 <strong>{reward.cost} XP</strong>
@@ -106,10 +110,10 @@ function RewardsPage() {
               >
                 {reward.claimed ? "Ja resgatada" : canRedeem ? "Resgatar agora" : "Saldo insuficiente"}
               </button>
-            </article>
+            </motion.article>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

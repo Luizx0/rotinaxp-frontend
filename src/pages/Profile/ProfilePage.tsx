@@ -1,5 +1,7 @@
+import { motion } from "framer-motion";
 import { FormEvent, useEffect, useState } from "react";
 import AlertBanner from "../../components/common/AlertBanner";
+import { fadeInUp, staggerContainer } from "../../components/common/motion";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
 import { useAuth } from "../../hooks/useAuth";
@@ -39,22 +41,22 @@ function ProfilePage() {
 
   return (
     <section className="page-stack">
-      <div className="page-hero">
+      <motion.div className="page-hero" variants={fadeInUp} initial="hidden" animate="show">
         <div>
           <p className="section-eyebrow">Conta</p>
           <h2>Perfil</h2>
           <p>Area de configuracao pessoal para ajustar informacoes da conta, meta diaria e descricao do usuario.</p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="stats-grid stats-grid--compact">
+      <motion.div className="stats-grid stats-grid--compact" variants={staggerContainer} initial="hidden" animate="show">
         <StatCard label="Nivel" value={`${session?.user.level ?? 1}`} helper="calculado por faixa de pontos" tone="primary" />
         <StatCard label="Tarefas" value={`${tasks.length}`} helper="volume total cadastrado" tone="success" />
         <StatCard label="Recompensas" value={`${rewards.length}`} helper="catalogo disponivel" tone="neutral" />
-      </div>
+      </motion.div>
 
-      <div className="dashboard-grid dashboard-grid--two-columns">
-        <form className="panel-card form-panel" onSubmit={handleSubmit}>
+      <motion.div className="dashboard-grid dashboard-grid--two-columns" variants={staggerContainer} initial="hidden" animate="show">
+        <motion.form className="panel-card form-panel tour-profile-form" onSubmit={handleSubmit} variants={fadeInUp}>
           <div className="section-heading">
             <div>
               <p className="section-eyebrow">Edicao</p>
@@ -95,9 +97,9 @@ function ProfilePage() {
               Salvar perfil
             </button>
           </div>
-        </form>
+        </motion.form>
 
-        <article className="panel-card gradient-panel">
+        <motion.article className="panel-card gradient-panel" variants={fadeInUp}>
           <p className="section-eyebrow">Identidade</p>
           <h3>{session?.user.name}</h3>
           <p>{session?.user.role}</p>
@@ -111,8 +113,8 @@ function ProfilePage() {
               <p>sequencia ativa de execucao</p>
             </div>
           </div>
-        </article>
-      </div>
+        </motion.article>
+      </motion.div>
     </section>
   );
 }

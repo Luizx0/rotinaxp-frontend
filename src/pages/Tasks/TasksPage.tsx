@@ -1,5 +1,7 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import AlertBanner from "../../components/common/AlertBanner";
+import { fadeInUp, staggerContainer } from "../../components/common/motion";
 import Modal from "../../components/common/Modal";
 import PageTabs from "../../components/common/PageTabs";
 import TaskComposer from "../../components/tasks/TaskComposer";
@@ -78,13 +80,13 @@ function TasksPage() {
 
   return (
     <section className="page-stack">
-      <div className="page-hero">
+      <motion.div className="page-hero" variants={fadeInUp} initial="hidden" animate="show">
         <div>
           <p className="section-eyebrow">Execucao</p>
           <h2>Tarefas</h2>
           <p>Crie, ajuste, conclua e reorganize as tarefas em uma pagina com filtros e overlay de edicao.</p>
         </div>
-      </div>
+      </motion.div>
 
       {isLoading ? <p className="form-hint">Carregando tarefas...</p> : null}
       {error ? <AlertBanner message={error} /> : null}
@@ -100,10 +102,14 @@ function TasksPage() {
         onChange={setActiveTab}
       />
 
-      <div className="tasks-layout">
-        <TaskComposer title="Nova tarefa" submitLabel="Criar tarefa" onSubmit={handleCreateSubmit} />
-        <TaskList tasks={filteredTasks} onToggle={handleToggleTask} onEdit={editModal.open} />
-      </div>
+      <motion.div className="tasks-layout" variants={staggerContainer} initial="hidden" animate="show">
+        <motion.div className="tour-tasks-composer" variants={fadeInUp}>
+          <TaskComposer title="Nova tarefa" submitLabel="Criar tarefa" onSubmit={handleCreateSubmit} />
+        </motion.div>
+        <motion.div className="tour-tasks-list" variants={fadeInUp}>
+          <TaskList tasks={filteredTasks} onToggle={handleToggleTask} onEdit={editModal.open} />
+        </motion.div>
+      </motion.div>
 
       <Modal isOpen={editModal.isOpen} title="Editar tarefa" onClose={editModal.close}>
         {editModal.payload ? (

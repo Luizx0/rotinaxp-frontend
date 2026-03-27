@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { fadeInUp } from "../common/motion";
 
 interface CompletionChartProps {
   completed: number;
@@ -12,7 +14,7 @@ function CompletionChart({ completed, open }: CompletionChartProps) {
   ];
 
   return (
-    <div className="chart-card">
+    <motion.div className="chart-card" variants={fadeInUp}>
       <div className="chart-card__header">
         <div>
           <p className="section-eyebrow">Fluxo</p>
@@ -32,7 +34,7 @@ function CompletionChart({ completed, open }: CompletionChartProps) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

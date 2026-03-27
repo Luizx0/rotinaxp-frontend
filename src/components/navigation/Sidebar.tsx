@@ -54,7 +54,7 @@ function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onNavigate }: SidebarP
         </button>
       </div>
 
-      <nav className="sidebar__nav" aria-label="Navegacao principal">
+      <nav className="sidebar__nav tour-sidebar-nav" aria-label="Navegacao principal">
         {sidebarMenuItems.map((item) => (
           <NavLink
             key={item.to}

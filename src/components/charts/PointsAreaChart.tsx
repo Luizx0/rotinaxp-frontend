@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { fadeInUp } from "../common/motion";
 import { ProgressPoint } from "../../types/app";
 
 interface PointsAreaChartProps {
@@ -7,7 +9,7 @@ interface PointsAreaChartProps {
 
 function PointsAreaChart({ data }: PointsAreaChartProps) {
   return (
-    <div className="chart-card">
+    <motion.div className="chart-card" variants={fadeInUp}>
       <div className="chart-card__header">
         <div>
           <p className="section-eyebrow">Performance</p>
@@ -32,7 +34,7 @@ function PointsAreaChart({ data }: PointsAreaChartProps) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

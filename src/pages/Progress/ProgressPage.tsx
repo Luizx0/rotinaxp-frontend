@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import AlertBanner from "../../components/common/AlertBanner";
 import PointsAreaChart from "../../components/charts/PointsAreaChart";
+import { fadeInUp, staggerContainer } from "../../components/common/motion";
 import PageTabs from "../../components/common/PageTabs";
 import { useAppData } from "../../hooks/useAppData";
 
@@ -24,13 +26,13 @@ function ProgressPage() {
 
   return (
     <section className="page-stack">
-      <div className="page-hero">
+      <motion.div className="page-hero" variants={fadeInUp} initial="hidden" animate="show">
         <div>
           <p className="section-eyebrow">Historico</p>
           <h2>Progresso</h2>
           <p>Leitura de tendencia para pontos e entregas realizadas ao longo do tempo.</p>
         </div>
-      </div>
+      </motion.div>
 
       {isLoading ? <p className="form-hint">Carregando progresso...</p> : null}
       {error ? <AlertBanner message={error} /> : null}
@@ -44,10 +46,12 @@ function ProgressPage() {
         onChange={setActiveTab}
       />
 
-      <div className="dashboard-grid dashboard-grid--two-columns">
-        <PointsAreaChart data={chartData} />
+      <motion.div className="dashboard-grid dashboard-grid--two-columns" variants={staggerContainer} initial="hidden" animate="show">
+        <motion.div className="tour-progress-chart" variants={fadeInUp}>
+          <PointsAreaChart data={chartData} />
+        </motion.div>
 
-        <article className="panel-card">
+        <motion.article className="panel-card" variants={fadeInUp}>
           <div className="section-heading">
             <div>
               <p className="section-eyebrow">Timeline</p>
@@ -70,8 +74,8 @@ function ProgressPage() {
               </div>
             ))}
           </div>
-        </article>
-      </div>
+        </motion.article>
+      </motion.div>
     </section>
   );
 }

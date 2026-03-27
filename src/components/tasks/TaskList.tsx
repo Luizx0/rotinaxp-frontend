@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import { fadeInUp } from "../common/motion";
 import { Task } from "../../types/app";
 
 interface TaskListProps {
@@ -26,7 +28,7 @@ function TaskList({ tasks, onToggle, onEdit }: TaskListProps) {
   return (
     <div className="task-list">
       {tasks.map((task) => (
-        <article key={task.id} className={`task-item ${task.completed ? "task-item--completed" : ""}`}>
+        <motion.article key={task.id} className={`task-item ${task.completed ? "task-item--completed" : ""}`} variants={fadeInUp}>
           <div className="task-item__meta">
             <span className="pill">{task.category}</span>
             <span className={`pill pill--priority-${task.priority}`}>{task.priority}</span>
@@ -52,7 +54,7 @@ function TaskList({ tasks, onToggle, onEdit }: TaskListProps) {
               </button>
             </div>
           </div>
-        </article>
+        </motion.article>
       ))}
     </div>
   );

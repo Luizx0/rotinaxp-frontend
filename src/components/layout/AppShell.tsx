@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import GuidedTour from "../common/GuidedTour";
 import Sidebar from "../navigation/Sidebar";
 import TopBar from "../navigation/TopBar";
 
@@ -17,6 +18,7 @@ function AppShell() {
       />
       {isSidebarOpen ? <button type="button" className="app-shell__overlay" onClick={() => setIsSidebarOpen(false)} /> : null}
       <div className="app-shell__main">
+        <GuidedTour />
         <TopBar
           onToggleSidebar={() => setIsSidebarOpen((currentState) => !currentState)}
           onToggleSidebarCollapse={() => setIsSidebarCollapsed((currentState) => !currentState)}

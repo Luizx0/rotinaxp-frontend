@@ -43,7 +43,7 @@ function TopBar({ onToggleSidebar, onToggleSidebarCollapse, isSidebarCollapsed }
           <strong>{session?.user.points ?? 0}</strong>
         </div>
 
-        <button type="button" className="icon-button" onClick={toggleMode} aria-label="Alternar tema claro e escuro">
+        <button type="button" className="icon-button tour-theme-toggle" onClick={toggleMode} aria-label="Alternar tema claro e escuro">
           {mode === "light" ? <BedtimeOutlinedIcon fontSize="small" /> : <LightModeOutlinedIcon fontSize="small" />}
         </button>
 
