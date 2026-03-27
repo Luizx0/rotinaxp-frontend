@@ -1,10 +1,11 @@
 import { useState } from "react";
+import AlertBanner from "../../components/common/AlertBanner";
 import PointsAreaChart from "../../components/charts/PointsAreaChart";
 import PageTabs from "../../components/common/PageTabs";
 import { useAppData } from "../../hooks/useAppData";
 
 function ProgressPage() {
-  const { progress, tasks } = useAppData();
+  const { progress, tasks, isLoading, error } = useAppData();
   const [activeTab, setActiveTab] = useState("week");
 
   const chartData =
@@ -30,6 +31,9 @@ function ProgressPage() {
           <p>Leitura de tendencia para pontos e entregas realizadas ao longo do tempo.</p>
         </div>
       </div>
+
+      {isLoading ? <p className="form-hint">Carregando progresso...</p> : null}
+      {error ? <AlertBanner message={error} /> : null}
 
       <PageTabs
         tabs={[

@@ -1,22 +1,15 @@
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { topBarTitleMap } from "../../routes/paths";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
 }
 
-const titleMap: Record<string, string> = {
-  "/dashboard": "Painel central",
-  "/tasks": "Gestao de tarefas",
-  "/rewards": "Loja de recompensas",
-  "/progress": "Historico de progresso",
-  "/profile": "Configuracoes do perfil",
-};
-
 function TopBar({ onToggleSidebar }: TopBarProps) {
   const { pathname } = useLocation();
   const { session, logout } = useAuth();
-  const currentTitle = titleMap[pathname] ?? "RotinaXP";
+  const currentTitle = topBarTitleMap[pathname] ?? "RotinaXP";
 
   return (
     <header className="topbar">

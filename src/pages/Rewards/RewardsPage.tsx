@@ -1,13 +1,16 @@
 import { useState } from "react";
+import AlertBanner from "../../components/common/AlertBanner";
 import PageTabs from "../../components/common/PageTabs";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
 import { useAuth } from "../../hooks/useAuth";
+import { getErrorMessage } from "../../services/errorService";
 
 function RewardsPage() {
-  const { rewards, redeemReward } = useAppData();
+  const { rewards, redeemReward, isLoading, error, clearError } = useAppData();
   const { session } = useAuth();
   const [activeTab, setActiveTab] = useState("available");
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const visibleRewards = rewards.filter((reward) => {
     if (activeTab === "claimed") {
@@ -16,6 +19,17 @@ function RewardsPage() {
 
     return !reward.claimed;
   });
+
+  async function handleRedeemReward(rewardId: string) {
+    setLocalError(null);
+    clearError();
+
+    try {
+      await redeemReward(rewardId);
+    } catch (currentError) {
+      setLocalError(getErrorMessage(currentError, "Nao foi possivel resgatar a recompensa."));
+    }
+  }
 
   return (
     <section className="page-stack">
@@ -31,6 +45,10 @@ function RewardsPage() {
           <p>Use os pontos ganhos nas tarefas para resgatar motivadores.</p>
         </div>
       </div>
+
+      {isLoading ? <p className="form-hint">Carregando recompensas...</p> : null}
+      {error ? <AlertBanner message={error} /> : null}
+      {localError ? <AlertBanner message={localError} /> : null}
 
       <PageTabs
         tabs={[
@@ -62,7 +80,7 @@ function RewardsPage() {
                 type="button"
                 className={canRedeem ? "primary-button" : "secondary-button"}
                 disabled={!canRedeem}
-                onClick={() => void redeemReward(reward.id)}
+                onClick={() => void handleRedeemReward(reward.id)}
               >
                 {reward.claimed ? "Ja resgatada" : canRedeem ? "Resgatar agora" : "Saldo insuficiente"}
               </button>

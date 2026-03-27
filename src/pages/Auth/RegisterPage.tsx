@@ -1,7 +1,10 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AlertBanner from "../../components/common/AlertBanner";
 import AuthLayout from "../../components/layout/AuthLayout";
 import { useAuth } from "../../hooks/useAuth";
+import { appPaths } from "../../routes/paths";
+import { getErrorMessage } from "../../services/errorService";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -31,9 +34,9 @@ function RegisterPage() {
 
     try {
       await register({ name, email, password });
-      navigate("/dashboard");
+      navigate(appPaths.dashboard);
     } catch (currentError) {
-      setError(currentError instanceof Error ? currentError.message : "Nao foi possivel criar a conta.");
+      setError(getErrorMessage(currentError, "Nao foi possivel criar a conta."));
     } finally {
       setIsSubmitting(false);
     }
@@ -46,7 +49,7 @@ function RegisterPage() {
       description="Cadastro com estado global, layout responsivo e navegacao protegida para evoluir com autenticacao real depois."
       footer={
         <p>
-          Ja tem conta? <Link to="/login">Voltar para login</Link>
+          Ja tem conta? <Link to={appPaths.login}>Voltar para login</Link> · <Link to={appPaths.root}>Voltar para homepage</Link>
         </p>
       }
     >
@@ -77,7 +80,7 @@ function RegisterPage() {
           <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
         </label>
 
-        {error ? <p className="form-error">{error}</p> : null}
+        {error ? <AlertBanner message={error} /> : null}
 
         <button type="submit" className="primary-button primary-button--block" disabled={isSubmitting}>
           {isSubmitting ? "Criando..." : "Criar e entrar"}

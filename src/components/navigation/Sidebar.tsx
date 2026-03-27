@@ -1,17 +1,10 @@
 import { NavLink } from "react-router-dom";
+import { sidebarMenuItems } from "../../routes/paths";
 
 interface SidebarProps {
   isOpen: boolean;
   onNavigate: () => void;
 }
-
-const menuItems = [
-  { label: "Dashboard", to: "/dashboard", code: "DB" },
-  { label: "Tarefas", to: "/tasks", code: "TK" },
-  { label: "Recompensas", to: "/rewards", code: "RW" },
-  { label: "Progresso", to: "/progress", code: "PG" },
-  { label: "Perfil", to: "/profile", code: "PF" },
-];
 
 function Sidebar({ isOpen, onNavigate }: SidebarProps) {
   return (
@@ -25,7 +18,7 @@ function Sidebar({ isOpen, onNavigate }: SidebarProps) {
       </div>
 
       <nav className="sidebar__nav" aria-label="Navegacao principal">
-        {menuItems.map((item) => (
+        {sidebarMenuItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

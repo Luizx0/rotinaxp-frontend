@@ -1,16 +1,19 @@
 import { FormEvent, useEffect, useState } from "react";
+import AlertBanner from "../../components/common/AlertBanner";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
 import { useAuth } from "../../hooks/useAuth";
+import { getErrorMessage } from "../../services/errorService";
 
 function ProfilePage() {
-  const { session, updateProfile } = useAuth();
+  const { session, updateProfile, error, clearError } = useAuth();
   const { tasks, rewards } = useAppData();
   const [name, setName] = useState(session?.user.name ?? "");
   const [email, setEmail] = useState(session?.user.email ?? "");
   const [about, setAbout] = useState(session?.user.about ?? "");
   const [dailyGoal, setDailyGoal] = useState(session?.user.dailyGoal ?? 100);
   const [feedback, setFeedback] = useState("");
+  const [feedbackTone, setFeedbackTone] = useState<"error" | "success">("success");
 
   useEffect(() => {
     setName(session?.user.name ?? "");
@@ -21,8 +24,17 @@ function ProfilePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await updateProfile({ name, email, about, dailyGoal });
-    setFeedback("Perfil atualizado com sucesso.");
+    setFeedback("");
+    clearError();
+
+    try {
+      await updateProfile({ name, email, about, dailyGoal });
+      setFeedback("Perfil atualizado com sucesso.");
+      setFeedbackTone("success");
+    } catch (currentError) {
+      setFeedback(getErrorMessage(currentError, "Nao foi possivel atualizar o perfil."));
+      setFeedbackTone("error");
+    }
   }
 
   return (
@@ -75,7 +87,8 @@ function ProfilePage() {
             </label>
           </div>
 
-          {feedback ? <p className="form-success">{feedback}</p> : null}
+          {error ? <AlertBanner message={error} /> : null}
+          {feedback ? <AlertBanner message={feedback} tone={feedbackTone} /> : null}
 
           <div className="form-actions">
             <button type="submit" className="primary-button">

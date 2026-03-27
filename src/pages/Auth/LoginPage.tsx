@@ -1,7 +1,10 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AlertBanner from "../../components/common/AlertBanner";
 import AuthLayout from "../../components/layout/AuthLayout";
 import { useAuth } from "../../hooks/useAuth";
+import { appPaths } from "../../routes/paths";
+import { getErrorMessage } from "../../services/errorService";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -18,9 +21,9 @@ function LoginPage() {
 
     try {
       await login({ email, password });
-      navigate("/dashboard");
+      navigate(appPaths.dashboard);
     } catch (currentError) {
-      setError(currentError instanceof Error ? currentError.message : "Nao foi possivel entrar.");
+      setError(getErrorMessage(currentError, "Nao foi possivel entrar."));
     } finally {
       setIsSubmitting(false);
     }
@@ -33,7 +36,7 @@ function LoginPage() {
       description="Uma entrada limpa para chegar rapido no painel, consultar metas, concluir tarefas e trocar recompensas."
       footer={
         <p>
-          Ainda nao tem conta? <Link to="/register">Criar cadastro</Link>
+          Ainda nao tem conta? <Link to={appPaths.register}>Criar cadastro</Link> · <Link to={appPaths.root}>Voltar para homepage</Link>
         </p>
       }
     >
@@ -54,7 +57,7 @@ function LoginPage() {
           <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
         </label>
 
-        {error ? <p className="form-error">{error}</p> : null}
+        {error ? <AlertBanner message={error} /> : null}
 
         <button type="submit" className="primary-button primary-button--block" disabled={isSubmitting}>
           {isSubmitting ? "Entrando..." : "Acessar painel"}

@@ -1,7 +1,8 @@
-import { createContext, PropsWithChildren, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import { initialProgress } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
 import { getLevelFromPoints } from "../services/authService";
+import { getErrorMessage } from "../services/errorService";
 import { redeemReward as redeemRewardService, getRewards } from "../services/rewardService";
 import {
   alternarConclusao,
@@ -16,6 +17,8 @@ interface AppDataContextValue {
   rewards: Reward[];
   progress: ProgressPoint[];
   isLoading: boolean;
+  error: string | null;
+  clearError: () => void;
   refreshAll: () => Promise<void>;
   addTask: (draft: TaskDraft) => Promise<void>;
   updateTask: (taskId: string, draft: TaskDraft) => Promise<void>;
@@ -69,8 +72,11 @@ export function AppDataProvider({ children }: PropsWithChildren) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  async function refreshAll() {
+  const refreshAll = useCallback(async () => {
+    setError(null);
+
     if (!isAuthenticated) {
       setTasks([]);
       setRewards([]);
@@ -84,28 +90,54 @@ export function AppDataProvider({ children }: PropsWithChildren) {
       const [nextTasks, nextRewards] = await Promise.all([getTarefas(), getRewards()]);
       setTasks(nextTasks);
       setRewards(nextRewards);
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel carregar os dados da aplicacao."));
+      throw currentError;
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    void refreshAll();
-  }, [isAuthenticated, session?.user.id]);
+    void refreshAll().catch(() => undefined);
+  }, [refreshAll, session?.user.id]);
 
   async function addTask(draft: TaskDraft) {
-    const createdTask = await criarTarefa(draft);
-    setTasks((currentTasks) => [createdTask, ...currentTasks]);
+    setError(null);
+
+    try {
+      const createdTask = await criarTarefa(draft);
+      setTasks((currentTasks) => [createdTask, ...currentTasks]);
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel criar a tarefa."));
+      throw currentError;
+    }
   }
 
   async function updateTask(taskId: string, draft: TaskDraft) {
-    const updatedTask = await atualizarTarefa(taskId, draft);
-    setTasks((currentTasks) => currentTasks.map((task) => (task.id === taskId ? updatedTask : task)));
+    setError(null);
+
+    try {
+      const updatedTask = await atualizarTarefa(taskId, draft);
+      setTasks((currentTasks) => currentTasks.map((task) => (task.id === taskId ? updatedTask : task)));
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel atualizar a tarefa."));
+      throw currentError;
+    }
   }
 
   async function toggleTask(taskId: string) {
     const previousTask = tasks.find((task) => task.id === taskId);
-    const updatedTask = await alternarConclusao(taskId);
+    setError(null);
+
+    let updatedTask: Task;
+
+    try {
+      updatedTask = await alternarConclusao(taskId);
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel alternar a tarefa."));
+      throw currentError;
+    }
 
     setTasks((currentTasks) => currentTasks.map((task) => (task.id === taskId ? updatedTask : task)));
 
@@ -127,6 +159,8 @@ export function AppDataProvider({ children }: PropsWithChildren) {
   }
 
   async function redeemReward(rewardId: string) {
+    setError(null);
+
     if (!session) {
       return;
     }
@@ -137,7 +171,15 @@ export function AppDataProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    const updatedReward = await redeemRewardService(rewardId);
+    let updatedReward: Reward;
+
+    try {
+      updatedReward = await redeemRewardService(rewardId);
+    } catch (currentError) {
+      setError(getErrorMessage(currentError, "Nao foi possivel resgatar a recompensa."));
+      throw currentError;
+    }
+
     setRewards((currentRewards) => currentRewards.map((item) => (item.id === rewardId ? updatedReward : item)));
 
     const nextPoints = Math.max(0, session.user.points - reward.cost);
@@ -147,6 +189,10 @@ export function AppDataProvider({ children }: PropsWithChildren) {
     });
   }
 
+  function clearError() {
+    setError(null);
+  }
+
   return (
     <AppDataContext.Provider
       value={{
@@ -154,6 +200,8 @@ export function AppDataProvider({ children }: PropsWithChildren) {
         rewards,
         progress: buildProgress(tasks),
         isLoading,
+        error,
+        clearError,
         refreshAll,
         addTask,
         updateTask,

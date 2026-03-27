@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CompletionChart from "../../components/charts/CompletionChart";
 import PointsAreaChart from "../../components/charts/PointsAreaChart";
+import AlertBanner from "../../components/common/AlertBanner";
 import PageTabs from "../../components/common/PageTabs";
 import StatCard from "../../components/common/StatCard";
 import { useAppData } from "../../hooks/useAppData";
@@ -8,7 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 function DashboardPage() {
   const { session } = useAuth();
-  const { tasks, rewards, progress } = useAppData();
+  const { tasks, rewards, progress, isLoading, error } = useAppData();
   const [activeTab, setActiveTab] = useState("overview");
 
   const completedTasks = tasks.filter((task) => task.completed).length;
@@ -49,6 +50,9 @@ function DashboardPage() {
         <StatCard label="Tarefas em aberto" value={`${openTasks}`} helper="Acoes pendentes" tone="warning" />
         <StatCard label="Recompensas ativas" value={`${availableRewards}`} helper="Itens disponiveis para troca" tone="neutral" />
       </div>
+
+      {isLoading ? <p className="form-hint">Atualizando indicadores...</p> : null}
+      {error ? <AlertBanner message={error} /> : null}
 
       {activeTab === "overview" ? (
         <div className="dashboard-grid">
