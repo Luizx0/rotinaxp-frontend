@@ -1,4 +1,5 @@
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import CardGiftcardOutlinedIcon from "@mui/icons-material/CardGiftcardOutlined";
 import ChevronLeftOutlinedIcon from "@mui/icons-material/ChevronLeftOutlined";
 import ChevronRightOutlinedIcon from "@mui/icons-material/ChevronRightOutlined";
@@ -36,7 +37,9 @@ function Sidebar({ isOpen, isCollapsed, onToggleCollapse, onNavigate }: SidebarP
   return (
     <aside className={`sidebar ${isOpen ? "sidebar--open" : ""} ${isCollapsed ? "sidebar--collapsed" : ""}`}>
       <div className="sidebar__brand">
-        <div className="sidebar__logo">RX</div>
+        <div className="sidebar__logo">
+          <AutoAwesomeOutlinedIcon fontSize="small" />
+        </div>
         {!isCollapsed ? (
           <div>
             <strong>RotinaXP</strong>

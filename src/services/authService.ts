@@ -75,11 +75,11 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthSessio
     email: normalizeEmail(payload.email),
     password: payload.password,
     role: "Novo jogador",
-    points: 120,
-    streak: 1,
-    level: 2,
+    points: 0,
+    streak: 0,
+    level: 1,
     dailyGoal: 100,
-    about: "Comecando a montar uma rotina consistente.",
+    about: "Pronto para comecar uma nova rotina.",
   };
 
   saveAccounts([...accounts, newAccount]);
