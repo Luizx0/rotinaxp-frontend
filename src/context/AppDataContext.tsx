@@ -112,13 +112,15 @@ export function AppDataProvider({ children }: PropsWithChildren) {
   }, [refreshAll, session?.user.id]);
 
   useEffect(() => {
-    if (!session) {
+    const userId = session?.user.id;
+
+    if (!userId) {
       setIsOnboardingDismissed(false);
       return;
     }
 
-    setIsOnboardingDismissed(readOnboardingState(session.user.id));
-  }, [session?.user.id]);
+    setIsOnboardingDismissed(readOnboardingState(userId));
+  }, [session]);
 
   async function addTask(draft: TaskDraft) {
     setError(null);
