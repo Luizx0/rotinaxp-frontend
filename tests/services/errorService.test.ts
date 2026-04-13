@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getErrorMessage } from "../../src/services/errorService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -7,15 +7,15 @@ function makeAxiosError(
   message: string,
   responseData?: unknown,
   status = 400
-): axios.AxiosError {
-  const error = new axios.AxiosError(message);
+): AxiosError {
+  const error = new AxiosError(message);
   if (responseData !== undefined) {
     error.response = {
       data: responseData,
       status,
       statusText: "Bad Request",
       headers: {},
-      config: {} as axios.InternalAxiosRequestConfig,
+      config: {} as InternalAxiosRequestConfig,
     };
   }
   return error;

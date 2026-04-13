@@ -5,6 +5,7 @@ import {
   redeemReward,
 } from "../../src/services/rewardService";
 import { writeStorage, storageKeys } from "../../src/services/storage";
+import { Reward } from "../../src/types/app";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,7 @@ describe("createReward", () => {
     });
     const rewards = await getRewards();
     expect(rewards).toHaveLength(2);
-    const titulos = rewards.map((r) => r.title);
+    const titulos = rewards.map((r: Reward) => r.title);
     expect(titulos).toContain("Recompensa A");
     expect(titulos).toContain("Recompensa B");
   });
@@ -160,7 +161,7 @@ describe("redeemReward", () => {
     });
     await redeemReward(criada.id);
     const rewards = await getRewards();
-    const encontrada = rewards.find((r) => r.id === criada.id);
+    const encontrada = rewards.find((r: Reward) => r.id === criada.id);
     expect(encontrada!.claimed).toBe(true);
   });
 
@@ -184,7 +185,7 @@ describe("redeemReward", () => {
     jest.useRealTimers();
     await redeemReward(r1.id);
     const rewards = await getRewards();
-    const r2Atualizado = rewards.find((r) => r.id === r2.id)!;
+    const r2Atualizado = rewards.find((r: Reward) => r.id === r2.id)!;
     expect(r2Atualizado.claimed).toBe(false);
   });
 });

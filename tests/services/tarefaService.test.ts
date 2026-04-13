@@ -7,6 +7,7 @@ import {
 } from "../../src/services/tarefaService";
 import { writeStorage, storageKeys } from "../../src/services/storage";
 import api from "../../src/services/api";
+import { Task } from "../../src/types/app";
 
 // ─── Mock do módulo de API ────────────────────────────────────────────────────
 
@@ -146,7 +147,7 @@ describe("criarTarefa", () => {
     mockGet.mockRejectedValue(new Error("Network Error"));
     await criarTarefa(novaDraft);
     const tasks = await getTarefas();
-    expect(tasks.some((t) => t.title === "Nova Tarefa")).toBe(true);
+    expect(tasks.some((t: Task) => t.title === "Nova Tarefa")).toBe(true);
   });
 
   it("usa os dados da API quando a resposta é bem-sucedida", async () => {
@@ -184,7 +185,7 @@ describe("alternarConclusao", () => {
     mockGet.mockRejectedValue(new Error("Network Error"));
     mockPatch.mockRejectedValue(new Error("Network Error"));
     const tasks = await getTarefas();
-    const pendente = tasks.find((t) => !t.completed)!;
+    const pendente = tasks.find((t: Task) => !t.completed)!;
     const result = await alternarConclusao(pendente.id);
     expect(result.completed).toBe(true);
   });
@@ -194,7 +195,7 @@ describe("alternarConclusao", () => {
     mockGet.mockRejectedValue(new Error("Network Error"));
     mockPatch.mockRejectedValue(new Error("Network Error"));
     const tasks = await getTarefas();
-    const concluida = tasks.find((t) => t.completed)!;
+    const concluida = tasks.find((t: Task) => t.completed)!;
     const result = await alternarConclusao(concluida.id);
     expect(result.completed).toBe(false);
   });
