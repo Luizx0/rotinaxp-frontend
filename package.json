@@ -31,6 +31,7 @@
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run build",
     "test": "react-scripts test",
+    "test:unit": "jest --config jest.config.js --watchAll=false",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
