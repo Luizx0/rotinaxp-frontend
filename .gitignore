@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#Markdowns
+CODE_HIGHLIGHTS.md
+FRONTEND_APRESENTACAO.md
+ERROR-NORMS.md
