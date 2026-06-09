@@ -1,0 +1,119 @@
+# =============================================================================
+# RotinaXP — Deploy to GitHub Pages
+# =============================================================================
+# Workflow GitHub Flow completo:
+#   1. CI Validation  → TypeScript check + Unit Tests + Build
+#   2. Deploy         → Publica automaticamente no GitHub Pages
+#
+# Triggers:
+#   - push na branch master   → CI + Deploy
+#   - pull_request em master  → CI only (validação antes do merge)
+#
+# Requisitos do repositório:
+#   Settings → Pages → Source: "GitHub Actions"
+# =============================================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Permissões necessárias para deploy no GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Garante que apenas um deploy roda por vez (cancela deploys anteriores em fila)
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+# =============================================================================
+# Jobs
+# =============================================================================
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # Job 1: CI — Build & Validate
+  # ---------------------------------------------------------------------------
+  # Roda em TODOS os eventos (push e PR).
+  # Valida que o código compila, passa nos testes e gera o build de produção.
+  # ---------------------------------------------------------------------------
+  ci:
+    name: "🔍 CI — Build & Validate"
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────────────────
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Node.js Setup ────────────────────────────────────────────────────
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # ── Dependências ─────────────────────────────────────────────────────
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      # ── TypeScript Check ─────────────────────────────────────────────────
+      - name: 🔎 TypeScript type check
+        run: npm run typecheck
+
+      # ── Testes Unitários ─────────────────────────────────────────────────
+      - name: 🧪 Run unit tests
+        run: npm run test:unit
+        env:
+          CI: true
+
+      # ── Build de Produção ────────────────────────────────────────────────
+      - name: 🏗️ Build production bundle
+        run: npm run build
+        env:
+          CI: true
+          # Define a homepage para funcionar corretamente no GitHub Pages
+          PUBLIC_URL: /rotinaxp-frontend
+
+      # ── Upload do Artefato de Build ──────────────────────────────────────
+      # Armazena o build para o job de deploy consumir.
+      # Só faz upload quando o evento é push em master (deploy real).
+      - name: 📤 Upload build artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Deploy — GitHub Pages
+  # ---------------------------------------------------------------------------
+  # Roda SOMENTE em push na master (após merge de PR).
+  # Pega o artefato de build do job anterior e publica no GitHub Pages.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: "🚀 Deploy to GitHub Pages"
+    runs-on: ubuntu-latest
+    needs: ci
+
+    # Só executa em push na master (não executa em PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ── Configuração do GitHub Pages ─────────────────────────────────────
+      - name: ⚙️ Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # ── Deploy ───────────────────────────────────────────────────────────
+      - name: 🌐 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
