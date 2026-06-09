@@ -1,32 +1,54 @@
+# =============================================================================
+# RotinaXP — CI (Continuous Integration)
+# =============================================================================
+# Pipeline de validação contínua para branches de feature.
+# Roda em qualquer push ou PR que NÃO seja a master (o deploy.yml cuida da master).
+#
+# Validações:
+#   1. TypeScript check  — garante tipagem correta
+#   2. Unit tests        — garante que os testes passam
+#   3. Build             — garante que o build de produção é gerado sem erros
+# =============================================================================
+
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [master]
+  pull_request:
+    branches-ignore: [master]
 
 jobs:
-  build:
+  ci:
+    name: "🔍 CI — Validate"
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18, 20, 22]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
-      - name: Install dependencies
-        run: npm install
+      - name: 📦 Install dependencies
+        run: npm ci
 
-      - name: Run TypeScript check
+      - name: 🔎 TypeScript type check
         run: npm run typecheck
 
-      - name: Run Tests
+      - name: 🧪 Run unit tests
         run: npm run test:unit
+        env:
+          CI: true
 
-      - name: Build
+      - name: 🏗️ Build
         run: npm run build
+        env:
+          CI: true
